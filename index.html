@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD RAKIBUL ISLAM - Smart Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.12);
+            --border: rgba(255, 255, 255, 0.2);
+            --accent: #00f2fe;
+            --income: #00ff88;
+            --expense: #ff4b2b;
+            --gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #0b0b0b, #000);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .profile-section {
+            text-align: center;
+            background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            padding: 5px;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: #fff;
+            font-size: 20px;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent);
+            transform: scale(1.2);
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .chart-status {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .chart-status i {
+            margin-right: 5px;
+        }
+
+        h2 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .dashboard-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 15px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .stat small {
+            font-size: 10px;
+            opacity: 0.8;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat div {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-bar {
+            background: rgba(0, 242, 254, 0.05);
+            border-style: dashed;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        button {
+            background: var(--gradient);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .list-container {
+            margin-top: 15px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .list-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .list-container::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        .item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item-info div {
+            font-size: 14px;
+        }
+
+        .item-info small {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .actions {
+            font-size: 18px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-delete {
+            color: #ff4b2b;
+            cursor: pointer;
+        }
+
+        .btn-check {
+            color: #00ff88;
+            cursor: pointer;
+        }
+
+        .done {
+            opacity: 0.5;
+            background: rgba(0, 255, 136, 0.1);
+            border-left-color: #00ff88;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card profile-section">
+            <img src="rakib.jpg" alt="Profile" class="profile-img">
+            <div class="profile-name">MD RAKIBUL ISLAM</div>
+            <div class="social-links">
+                <a href="https://www.facebook.com/share/18HmSnuWkL/?mibextid=wwXIfr"><i class="fab fa-facebook"></i></a>
+                <a href="rakibulislam11335@gmail.com"><i class="fas fa-envelope"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
+                <a href="https://t.me/traderrakib777"><i class="fab fa-telegram"></i></a>
+                <a href="https://wa.me/8801701860951"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-chart-line"></i> Cash Flow Analytics</h2>
+            <div class="chart-container">
+                <canvas id="financeChart"></canvas>
+            </div>
+            <div class="chart-status">
+                <span style="color: var(--income)"><i class="fas fa-circle-plus"></i> Income (Up)</span>
+                <span style="color: var(--expense)"><i class="fas fa-circle-minus"></i> Expense (Down)</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-list-check"></i> Daily Plan</h2>
+            <div class="dashboard-box">
+                <div class="stat"><small>Total Tasks</small>
+                    <div id="task-count">0</div>
+                </div>
+                <div class="stat"><small>Completed</small>
+                    <div id="done-count">0</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" class="search-bar" placeholder="🔍 Search plans ..."
+                    onkeyup="filterList('plan-list', this.value)">
+                <input type="text" id="task-input" placeholder="What is your plan today?">
+                <button onclick="addPlan()"><i class="fas fa-plus"></i> Add Plan</button>
+            </div>
+            <div class="list-container" id="plan-list"></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-receipt"></i> Daily Used</h2>
+            <div class="dashboard-box">
+                <div class="stat"><small>Today Cost</small>
+                    <div id="daily-expense">0 TK</div>
+                </div>
+                <div class="stat"><small>Total Cost</small>
+                    <div id="total-expense">0 TK</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" class="search-bar" placeholder="🔍 Search expense ..."
+                    onkeyup="filterList('expense-list', this.value)">
+                <input type="number" id="exp-amount" placeholder="Amount (TK)">
+                <input type="text" id="exp-reason" placeholder="Reason">
+                <button onclick="addFinance('expense')"
+                    style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #fff;">
+                    <i class="fas fa-minus-circle"></i> Submit Expense
+                </button>
+            </div>
+            <div class="list-container" id="expense-list"></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-hand-holding-dollar"></i> Income Manager</h2>
+            <div class="dashboard-box">
+                <div class="stat"><small>Today's Income</small>
+                    <div id="daily-income">0 TK</div>
+                </div>
+                <div class="stat"><small>Total Lifetime</small>
+                    <div id="total-income">0 TK</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" class="search-bar" placeholder="🔍 Search income..."
+                    onkeyup="filterList('income-list', this.value)">
+                <input type="number" id="inc-amount" placeholder="Amount (TK)">
+                <input type="text" id="inc-reason" placeholder="Source">
+                <button onclick="addFinance('income')"
+                    style="background: linear-gradient(135deg, #11998e, #38ef7d); color: #000;">
+                    <i class="fas fa-plus-circle"></i> Submit Income
+                </button>
+            </div>
+            <div class="list-container" id="income-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data Management
+        let storage = JSON.parse(localStorage.getItem('rakib_dashboard')) || {
+            date: new Date().toLocaleDateString(),
+            dailyExp: 0, totalExp: 0,
+            dailyInc: 0, totalInc: 0,
+            plans: [], expenses: [], incomes: []
+        };
+
+        let myChart;
+
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', ...storage.expenses.map(e => e.time), ...storage.incomes.map(i => i.time)].slice(-10),
+                    datasets: [{
+                        label: 'Cash Flow',
+                        data: [0],
+                        borderColor: '#00f2fe',
+                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#00f2fe'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#aaa' } },
+                        x: { grid: { display: false }, ticks: { color: '#aaa' } }
+                    }
+                }
+            });
+            updateChartData();
+        }
+
+        function updateChartData() {
+            // Logic to calculate points: Income adds (+), Expense subtracts (-)
+            let points = [0];
+            let currentBalance = 0;
+
+            // Combine and sort by time or just sequential for simplicity
+            const allActions = [
+                ...storage.incomes.map(i => ({ amt: i.amount, type: 'inc' })),
+                ...storage.expenses.map(e => ({ amt: e.amount, type: 'exp' }))
+            ];
+
+            allActions.forEach(action => {
+                if (action.type === 'inc') currentBalance += action.amt;
+                else currentBalance -= action.amt;
+                points.push(currentBalance);
+            });
+
+            myChart.data.labels = points.map((_, i) => i === 0 ? "Start" : "Step " + i);
+            myChart.data.datasets[0].data = points;
+            myChart.update();
+        }
+
+        function checkDateReset() {
+            let today = new Date().toLocaleDateString();
+            if (storage.date !== today) {
+                storage.dailyExp = 0;
+                storage.dailyInc = 0;
+                storage.date = today;
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('rakib_dashboard', JSON.stringify(storage));
+            updateDashboard();
+            updateChartData();
+        }
+
+        function updateDashboard() {
+            document.getElementById('daily-expense').innerText = storage.dailyExp + " TK";
+            document.getElementById('total-expense').innerText = storage.totalExp + " TK";
+            document.getElementById('daily-income').innerText = storage.dailyInc + " TK";
+            document.getElementById('total-income').innerText = storage.totalInc + " TK";
+            document.getElementById('task-count').innerText = storage.plans.length;
+            document.getElementById('done-count').innerText = storage.plans.filter(p => p.done).length;
+        }
+
+        function addPlan() {
+            const input = document.getElementById('task-input');
+            if (!input.value) return;
+            storage.plans.push({ text: input.value, done: false, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+            input.value = '';
+            saveData(); renderAll();
+        }
+
+        function togglePlan(index) {
+            storage.plans[index].done = !storage.plans[index].done;
+            saveData(); renderAll();
+        }
+
+        function deletePlan(index) {
+            storage.plans.splice(index, 1);
+            saveData(); renderAll();
+        }
+
+        function addFinance(type) {
+            const amtInp = document.getElementById(type === 'expense' ? 'exp-amount' : 'inc-amount');
+            const resInp = document.getElementById(type === 'expense' ? 'exp-reason' : 'inc-reason');
+            if (!amtInp.value || !resInp.value) return;
+
+            const val = parseFloat(amtInp.value);
+            const entry = { amount: val, reason: resInp.value, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+
+            if (type === 'expense') {
+                storage.dailyExp += val;
+                storage.totalExp += val;
+                storage.expenses.push(entry);
+            } else {
+                storage.dailyInc += val;
+                storage.totalInc += val;
+                storage.incomes.push(entry);
+            }
+
+            amtInp.value = ''; resInp.value = '';
+            saveData(); renderAll();
+        }
+
+        function deleteFinance(index, type) {
+            let list = (type === 'expense') ? storage.expenses : storage.incomes;
+            let item = list.splice(index, 1)[0];
+
+            if (type === 'expense') {
+                storage.dailyExp -= item.amount;
+                storage.totalExp -= item.amount;
+            } else {
+                storage.dailyInc -= item.amount;
+                storage.totalInc -= item.amount;
+            }
+            saveData(); renderAll();
+        }
+
+        function filterList(listId, query) {
+            const list = document.getElementById(listId);
+            const items = list.getElementsByClassName('item');
+            const term = query.toLowerCase();
+            for (let i = 0; i < items.length; i++) {
+                const text = items[i].querySelector('.item-text').innerText.toLowerCase();
+                items[i].style.display = text.includes(term) ? "flex" : "none";
+            }
+        }
+
+        function renderAll() {
+            // Render Plans
+            document.getElementById('plan-list').innerHTML = storage.plans.map((p, i) => `
+                <div class="item ${p.done ? 'done' : ''}">
+                    <div class="item-info"><div class="item-text">${p.text}</div><small>${p.time}</small></div>
+                    <div class="actions">
+                        <i class="fas fa-check-circle btn-check" onclick="togglePlan(${i})"></i>
+                        <i class="fas fa-trash btn-delete" onclick="deletePlan(${i})"></i>
+                    </div>
+                </div>
+            `).reverse().join('');
+
+            // Render Expenses
+            document.getElementById('expense-list').innerHTML = storage.expenses.map((e, i) => `
+                <div class="item" style="border-left-color: var(--expense)">
+                    <div class="item-info"><div class="item-text">${e.reason}: <b>${e.amount} TK</b></div><small>${e.time}</small></div>
+                    <i class="fas fa-trash btn-delete" onclick="deleteFinance(${storage.expenses.length - 1 - i}, 'expense')"></i>
+                </div>
+            `).reverse().join('');
+
+            // Render Incomes
+            document.getElementById('income-list').innerHTML = storage.incomes.map((n, i) => `
+                <div class="item" style="border-left-color: var(--income)">
+                    <div class="item-info"><div class="item-text">${n.reason}: <b>${n.amount} TK</b></div><small>${n.time}</small></div>
+                    <i class="fas fa-trash btn-delete" onclick="deleteFinance(${storage.incomes.length - 1 - i}, 'income')"></i>
+                </div>
+            `).reverse().join('');
+        }
+
+        // Initialize App
+        window.onload = () => {
+            checkDateReset();
+            updateDashboard();
+            initChart();
+            renderAll();
+        };
+    </script>
+</body>
+
+</html>
